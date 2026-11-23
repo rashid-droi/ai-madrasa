@@ -1,0 +1,89 @@
+// Madrasa Student Progress — database schema
+// Three models only: User, Student, DailyRecord.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+/// Every person who can sign in (admins, teachers, students).
+model User {
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(100)
+  username     String   @unique @db.VarChar(50)
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  /// Set when role = STUDENT: the student's profile.
+  studentProfile   Student?      @relation("StudentAccount")
+  /// Set when role = TEACHER: students assigned to this teacher.
+  assignedStudents Student[]     @relation("TeacherStudents")
+  /// Set when role = TEACHER: records this teacher marked.
+  markedRecords    DailyRecord[] @relation("RecordTeacher")
+
+  @@index([role])
+}
+
+/// Student profile, linked 1:1 to a STUDENT user account.
+model Student {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  className String   @db.VarChar(50)
+  teacherId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User          @relation("StudentAccount", fields: [userId], references: [id], onDelete: Cascade)
+  teacher User?         @relation("TeacherStudents", fields: [teacherId], references: [id], onDelete: SetNull)
+  records DailyRecord[]
+
+  @@index([teacherId])
+  @@index([className])
+}
+
+/// One record per student per date.
+model DailyRecord {
+  id        String   @id @default(cuid())
+  studentId String
+  /// Teacher who marked the record. Kept nullable in the DB only so a
+  /// student's history survives if that teacher account is later deleted.
+  /// The app always sets it when saving.
+  teacherId String?
+  date      DateTime @db.Date
+
+  // Prayers
+  fajr    Boolean @default(false)
+  dhuhr   Boolean @default(false)
+  asr     Boolean @default(false)
+  maghrib Boolean @default(false)
+  isha    Boolean @default(false)
+
+  // Daily learning
+  unitReading  Boolean @default(false)
+  quranReading Boolean @default(false)
+  writing      Boolean @default(false)
+  dikrByheart  Boolean @default(false)
+  quranHifz    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher User?   @relation("RecordTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, date])
+  @@index([date])
+  @@index([teacherId])
+}
