@@ -1,4 +1,5 @@
-import { LEARNING, PRAYERS, type Marks } from "@/lib/marks";
+import { TickTime } from "@/components/tick-time";
+import { ACTIVITIES, PRAYERS, type Marks, type Tasks, type TickTimes } from "@/lib/marks";
 
 /** Thin green progress bar. */
 export function ProgressBar({ value, max, className = "" }: { value: number; max: number; className?: string }) {
@@ -16,42 +17,70 @@ export function ProgressBar({ value, max, className = "" }: { value: number; max
   );
 }
 
-/** Read-only view of the ten marks, used by admin and student pages. */
-export function MarksView({ marks }: { marks: Marks }) {
-  return (
-    <div className="space-y-2">
-      <MarkRow title="Prayers" items={PRAYERS} marks={marks} />
-      <MarkRow title="Learning" items={LEARNING} marks={marks} />
-    </div>
-  );
-}
-
-function MarkRow({
-  title,
-  items,
+/**
+ * Read-only view of a day: what was ticked, when, and the teacher's tasks.
+ * Used by the teacher, admin and student history pages.
+ */
+export function MarksView({
+  date,
   marks,
+  times,
+  tasks,
 }: {
-  title: string;
-  items: readonly { key: keyof Marks; label: string }[];
+  date: string;
   marks: Marks;
+  times: TickTimes;
+  tasks: Tasks;
 }) {
   return (
-    <div>
-      <p className="mb-1 text-xs font-medium text-gray-500">{title}</p>
-      <ul className="flex flex-wrap gap-1.5">
-        {items.map((i) => (
-          <li
-            key={i.key}
-            className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${
-              marks[i.key] ? "bg-brand-50 text-brand-700" : "bg-gray-50 text-gray-400"
-            }`}
-          >
-            <span aria-hidden>{marks[i.key] ? "✓" : "–"}</span>
-            {i.label}
-            <span className="sr-only">{marks[i.key] ? "done" : "not done"}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-3">
+      <div>
+        <p className="mb-1.5 text-xs font-medium text-gray-500">Prayers</p>
+        <ul className="grid grid-cols-5 gap-1.5">
+          {PRAYERS.map((p) => (
+            <li
+              key={p.key}
+              className={`flex flex-col items-center rounded-lg px-1 py-1.5 text-center ${
+                marks[p.key] ? "bg-brand-50 text-brand-700" : "bg-gray-50 text-gray-400"
+              }`}
+            >
+              <span className="text-xs font-medium">
+                <span aria-hidden>{marks[p.key] ? "✓ " : ""}</span>
+                {p.label}
+                <span className="sr-only">{marks[p.key] ? " done" : " not done"}</span>
+              </span>
+              {marks[p.key] && times[p.key] ? (
+                <TickTime iso={times[p.key]!} recordDate={date} />
+              ) : (
+                <span className="text-xs">–</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p className="mb-1.5 text-xs font-medium text-gray-500">Activities</p>
+        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-100">
+          {ACTIVITIES.map((a) => (
+            <li key={a.key} className="flex items-start justify-between gap-3 px-3 py-2">
+              <div className="min-w-0">
+                <p className={`text-sm font-medium ${marks[a.key] ? "text-brand-700" : "text-gray-500"}`}>
+                  <span aria-hidden>{marks[a.key] ? "✓ " : "– "}</span>
+                  {a.label}
+                  <span className="sr-only">{marks[a.key] ? " done" : " not done"}</span>
+                </p>
+                {tasks[a.key] && <p className="mt-0.5 text-xs break-words text-gray-500">{tasks[a.key]}</p>}
+              </div>
+              {marks[a.key] && times[a.key] && (
+                <span className="shrink-0 pt-0.5">
+                  <TickTime iso={times[a.key]!} recordDate={date} />
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -54,28 +54,49 @@ model Student {
 }
 
 /// One record per student per date.
+/// The teacher writes the day's tasks; the student ticks what they did.
+/// Every tick stores the moment it was made (`…At`) so the teacher can check it.
 model DailyRecord {
   id        String   @id @default(cuid())
   studentId String
-  /// Teacher who marked the record. Kept nullable in the DB only so a
+  /// The student's teacher for this record. Kept nullable in the DB only so a
   /// student's history survives if that teacher account is later deleted.
-  /// The app always sets it when saving.
   teacherId String?
   date      DateTime @db.Date
 
-  // Prayers
-  fajr    Boolean @default(false)
-  dhuhr   Boolean @default(false)
-  asr     Boolean @default(false)
-  maghrib Boolean @default(false)
-  isha    Boolean @default(false)
+  // Prayers (ticked by the student)
+  fajr      Boolean   @default(false)
+  fajrAt    DateTime?
+  dhuhr     Boolean   @default(false)
+  dhuhrAt   DateTime?
+  asr       Boolean   @default(false)
+  asrAt     DateTime?
+  maghrib   Boolean   @default(false)
+  maghribAt DateTime?
+  isha      Boolean   @default(false)
+  ishaAt    DateTime?
 
-  // Daily learning
-  unitReading  Boolean @default(false)
-  quranReading Boolean @default(false)
-  writing      Boolean @default(false)
-  dikrByheart  Boolean @default(false)
-  quranHifz    Boolean @default(false)
+  // Daily activities (ticked by the student)
+  homework       Boolean   @default(false)
+  homeworkAt     DateTime?
+  unitReading    Boolean   @default(false)
+  unitReadingAt  DateTime?
+  quranReading   Boolean   @default(false)
+  quranReadingAt DateTime?
+  writing        Boolean   @default(false)
+  writingAt      DateTime?
+  dikrByheart    Boolean   @default(false)
+  dikrByheartAt  DateTime?
+  quranHifz      Boolean   @default(false)
+  quranHifzAt    DateTime?
+
+  // Task details written by the teacher (optional, e.g. "Surah Al-Mulk 1–10")
+  homeworkTask     String? @db.VarChar(300)
+  unitReadingTask  String? @db.VarChar(300)
+  quranReadingTask String? @db.VarChar(300)
+  writingTask      String? @db.VarChar(300)
+  dikrByheartTask  String? @db.VarChar(300)
+  quranHifzTask    String? @db.VarChar(300)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

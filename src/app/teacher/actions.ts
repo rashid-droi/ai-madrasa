@@ -4,56 +4,56 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { isDateString, maxMarkableDate, MIN_DATE, toDbDate } from "@/lib/dates";
-import { MARK_KEYS, type MarkKey } from "@/lib/marks";
+import { isDateString, MIN_DATE, toDbDate } from "@/lib/dates";
+import { ACTIVITY_KEYS, taskField, type ActivityKey } from "@/lib/marks";
+import { maxTaskDate } from "./limits";
 import { idSchema } from "@/lib/validation";
 
-const MarksSchema = z.object(
-  Object.fromEntries(MARK_KEYS.map((k) => [k, z.boolean()])) as Record<MarkKey, z.ZodBoolean>,
-).strict();
+const taskText = z
+  .string()
+  .trim()
+  .max(300, "Keep each task under 300 characters")
+  .transform((v) => (v === "" ? null : v));
 
-const SaveSchema = z.object({
-  date: z.string().refine(isDateString, "Invalid date"),
-  entries: z
-    .array(z.object({ studentId: idSchema, marks: MarksSchema }).strict())
-    .min(1, "Nothing to save")
-    .max(500, "Too many students in one save"),
-});
+const SaveSchema = z
+  .object({
+    date: z.string().refine(isDateString, "Invalid date"),
+    studentId: idSchema,
+    tasks: z
+      .object(Object.fromEntries(ACTIVITY_KEYS.map((k) => [k, taskText])) as Record<ActivityKey, typeof taskText>)
+      .strict(),
+  })
+  .strict();
 
-export type SaveResult = { ok: true; saved: number } | { ok: false; error: string };
+export type SaveTasksResult = { ok: true } | { ok: false; error: string };
 
-export async function saveDailyRecords(input: unknown): Promise<SaveResult> {
+/** Teacher writes the day's tasks for one of their students. Never touches the student's ticks. */
+export async function saveTasks(input: unknown): Promise<SaveTasksResult> {
   const teacher = await requireRole("TEACHER");
 
   const parsed = SaveSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
+  const { date, studentId, tasks } = parsed.data;
 
-  const { date, entries } = parsed.data;
-  if (date < MIN_DATE || date > maxMarkableDate()) {
-    return { ok: false, error: "You can't mark progress for that date" };
+  if (date < MIN_DATE || date > maxTaskDate()) {
+    return { ok: false, error: "You can't set tasks for that date" };
   }
 
-  const ids = [...new Set(entries.map((e) => e.studentId))];
-  if (ids.length !== entries.length) return { ok: false, error: "Duplicate student in request" };
+  // The student must currently be assigned to this teacher.
+  const owned = await db.student.count({ where: { id: studentId, teacherId: teacher.id } });
+  if (!owned) return { ok: false, error: "You can only set tasks for your own students. Refresh and try again." };
 
-  // Every student must currently be assigned to this teacher.
-  const owned = await db.student.count({ where: { id: { in: ids }, teacherId: teacher.id } });
-  if (owned !== ids.length) {
-    return { ok: false, error: "You can only mark your own students. Refresh and try again." };
-  }
-
+  const data = Object.fromEntries(ACTIVITY_KEYS.map((k) => [taskField(k), tasks[k]]));
   const day = toDbDate(date);
-  await db.$transaction(
-    entries.map(({ studentId, marks }) =>
-      db.dailyRecord.upsert({
-        where: { studentId_date: { studentId, date: day } },
-        create: { studentId, date: day, teacherId: teacher.id, ...marks },
-        update: { teacherId: teacher.id, ...marks },
-      }),
-    ),
-  );
+
+  await db.dailyRecord.upsert({
+    where: { studentId_date: { studentId, date: day } },
+    create: { studentId, date: day, teacherId: teacher.id, ...data },
+    update: { teacherId: teacher.id, ...data },
+  });
 
   revalidatePath("/teacher");
-  revalidatePath("/admin/records");
-  return { ok: true, saved: entries.length };
+  revalidatePath("/student", "layout");
+  revalidatePath("/admin", "layout");
+  return { ok: true };
 }

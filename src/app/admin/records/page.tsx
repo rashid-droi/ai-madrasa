@@ -8,7 +8,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, isDateString, MIN_DATE, toDbDate } from "@/lib/dates";
-import { countDone, MARKS_SELECT, marksOf, TOTAL_MARKS } from "@/lib/marks";
+import { countDone, marksOf, RECORD_SELECT, tasksOf, TOTAL_MARKS, tickTimesOf } from "@/lib/marks";
 import { getStudentFormOptions } from "../students/data";
 
 export const metadata: Metadata = { title: "Records" };
@@ -46,7 +46,7 @@ export default async function RecordsPage({ searchParams }: PageProps<"/admin/re
         records: {
           where: { date: toDbDate(date) },
           take: 1,
-          select: { ...MARKS_SELECT, teacher: { select: { name: true } } },
+          select: { ...RECORD_SELECT, teacher: { select: { name: true } } },
         },
       },
     }),
@@ -123,9 +123,9 @@ export default async function RecordsPage({ searchParams }: PageProps<"/admin/re
                       {marks && (
                         <div className="mt-3 space-y-3">
                           <ProgressBar value={done} max={TOTAL_MARKS} />
-                          <MarksView marks={marks} />
+                          <MarksView date={date} marks={marks} times={tickTimesOf(record)} tasks={tasksOf(record)} />
                           {record.teacher && (
-                            <p className="text-xs text-gray-400">Marked by {record.teacher.name}</p>
+                            <p className="text-xs text-gray-400">Teacher: {record.teacher.name}</p>
                           )}
                         </div>
                       )}

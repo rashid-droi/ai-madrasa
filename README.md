@@ -3,8 +3,8 @@
 A small app for tracking madrasa students' daily prayers and learning.
 
 - `/admin`: manage teachers and students, assign students to teachers, view records
-- `/teacher`: mark daily progress for assigned students
-- `/student`: view your own progress (read-only)
+- `/teacher`: set daily tasks for each assigned student and see when they ticked each item
+- `/student`: tick your own prayers and activities (each tick saves its time), plus a history view
 
 Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · PostgreSQL · Prisma 7
 
@@ -35,8 +35,8 @@ src/
   app/
     login/             sign-in page + login/logout server actions
     admin/             teachers, students, records (admin only)
-    teacher/           daily marking + saveDailyRecords action
-    student/           read-only monthly progress
+    teacher/           daily tasks per student + saveTasks action
+    student/           today ticking (setTick action) + history
   components/          dashboard shell, nav, UI primitives
 ```
 

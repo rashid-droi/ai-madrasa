@@ -7,7 +7,7 @@ import { MarksView, ProgressBar } from "@/components/progress";
 import { Card, EmptyState } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { formatDate, fromDbDate, maxMarkableDate } from "@/lib/dates";
-import { countDone, LEARNING, MARKS_SELECT, marksOf, PRAYERS, TOTAL_MARKS } from "@/lib/marks";
+import { ACTIVITIES, countDone, marksOf, PRAYERS, RECORD_SELECT, tasksOf, tickTimesOf, TOTAL_MARKS } from "@/lib/marks";
 
 const MONTH_RE = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
@@ -57,15 +57,19 @@ export async function RecordHistory({
   const records = await db.dailyRecord.findMany({
     where: { studentId, date: { gte: start, lt: end } },
     orderBy: { date: "desc" },
-    select: { date: true, ...MARKS_SELECT },
+    select: { date: true, ...RECORD_SELECT },
   });
 
-  const rows = records.map((r) => ({ date: fromDbDate(r.date), marks: marksOf(r) }));
+  const rows = records.map((r) => ({
+    date: fromDbDate(r.date),
+    marks: marksOf(r),
+    times: tickTimesOf(r),
+    tasks: tasksOf(r),
+  }));
   const prayerKeys = PRAYERS.map((p) => p.key);
-  const learningKeys = LEARNING.map((l) => l.key);
+  const activityKeys = ACTIVITIES.map((a) => a.key);
   const prayersDone = rows.reduce((n, r) => n + countDone(r.marks, prayerKeys), 0);
-  const learningDone = rows.reduce((n, r) => n + countDone(r.marks, learningKeys), 0);
-  const possible = rows.length * 5;
+  const activitiesDone = rows.reduce((n, r) => n + countDone(r.marks, activityKeys), 0);
 
   const lastMonth = maxMarkableDate().slice(0, 7);
   const next = shiftMonth(month, 1);
@@ -98,8 +102,8 @@ export async function RecordHistory({
       {/* Month summary */}
       <div className="grid grid-cols-3 gap-3">
         <Summary label="Days recorded" value={String(rows.length)} />
-        <Summary label="Prayers" value={possible ? `${prayersDone}/${possible}` : "–"} />
-        <Summary label="Learning" value={possible ? `${learningDone}/${possible}` : "–"} />
+        <Summary label="Prayers" value={rows.length ? `${prayersDone}/${rows.length * PRAYERS.length}` : "–"} />
+        <Summary label="Activities" value={rows.length ? `${activitiesDone}/${rows.length * ACTIVITIES.length}` : "–"} />
       </div>
 
       {rows.length === 0 ? (
@@ -120,7 +124,7 @@ export async function RecordHistory({
                     </span>
                   </div>
                   <ProgressBar value={done} max={TOTAL_MARKS} className="mb-3" />
-                  <MarksView marks={r.marks} />
+                  <MarksView date={r.date} marks={r.marks} times={r.times} tasks={r.tasks} />
                 </Card>
               </li>
             );
