@@ -100,7 +100,7 @@ export default async function StudentsPage({ searchParams }: PageProps<"/admin/s
                 {className}
                 <span className="font-normal text-gray-400">{list.length}</span>
               </h2>
-              <Card className="p-0">
+              <Card padding="none">
                 <ul className="divide-y divide-gray-100">
                   {list.map((s) => (
                     <li key={s.id}>

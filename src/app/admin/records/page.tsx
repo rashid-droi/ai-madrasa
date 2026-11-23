@@ -102,7 +102,7 @@ export default async function RecordsPage({ searchParams }: PageProps<"/admin/re
                   const marks = record ? marksOf(record) : null;
                   const done = marks ? countDone(marks) : 0;
                   return (
-                    <Card key={s.id} className="p-4">
+                    <Card key={s.id} padding="md">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="min-w-0">
                           <Link href={`/admin/students/${s.id}/records`} className="font-medium text-gray-900 hover:text-brand-700">

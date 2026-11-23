@@ -26,7 +26,7 @@ export default async function TeachersPage() {
       {teachers.length === 0 ? (
         <EmptyState text="No teachers yet. Add your first teacher to start assigning students." />
       ) : (
-        <Card className="p-0">
+        <Card padding="none">
           <ul className="divide-y divide-gray-100">
             {teachers.map((t) => (
               <li key={t.id}>

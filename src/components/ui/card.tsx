@@ -1,8 +1,19 @@
 import Link from "next/link";
 import type { HTMLAttributes, ReactNode } from "react";
 
-export function Card({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={`rounded-2xl border border-gray-200 bg-white p-5 shadow-sm ${className}`} {...props} />;
+const PADDING = { none: "", sm: "p-3", md: "p-4", lg: "p-5" } as const;
+
+export function Card({
+  className = "",
+  padding = "lg",
+  ...props
+}: HTMLAttributes<HTMLDivElement> & { padding?: keyof typeof PADDING }) {
+  return (
+    <div
+      className={`rounded-2xl border border-gray-200 bg-white shadow-sm ${PADDING[padding]} ${className}`}
+      {...props}
+    />
+  );
 }
 
 export function PageHeader({
@@ -67,6 +78,17 @@ export function EmptyState({ text, action }: { text: string; action?: ReactNode 
     <Card className="border-dashed text-center">
       <p className="py-6 text-sm text-gray-500">{text}</p>
       {action}
+    </Card>
+  );
+}
+
+/** Summary number card used on the overview pages. */
+export function StatCard({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
+  return (
+    <Card>
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="mt-1 text-3xl font-semibold text-gray-900 tabular-nums">{value}</p>
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
     </Card>
   );
 }

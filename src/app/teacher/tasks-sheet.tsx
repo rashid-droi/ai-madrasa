@@ -61,7 +61,7 @@ export function TasksSheet({ date, students }: { date: string; students: Student
 
   function goTo(next: string) {
     if (dirty && !window.confirm("You have unsaved tasks. Leave this date without saving?")) return;
-    router.push(`/teacher?date=${next}`);
+    router.push(`/teacher/tasks?date=${next}`);
   }
 
   function toggleOpen(id: string) {

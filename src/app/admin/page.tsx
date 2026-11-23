@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Card, PageHeader } from "@/components/ui/card";
+import { PageHeader, StatCard } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -24,10 +24,7 @@ export default async function AdminOverview() {
       <PageHeader title={`Assalamu alaikum, ${user.name}`} description="Madrasa at a glance." />
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
-          <Card key={s.label}>
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p className="mt-1 text-3xl font-semibold text-gray-900">{s.value}</p>
-          </Card>
+          <StatCard key={s.label} label={s.label} value={s.value} />
         ))}
       </div>
     </>

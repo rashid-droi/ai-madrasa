@@ -114,7 +114,7 @@ export async function RecordHistory({
             const done = countDone(r.marks);
             return (
               <li key={r.date}>
-                <Card className="p-4">
+                <Card padding="md">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <p className="font-medium text-gray-900">{formatDate(r.date)}</p>
                     <span
@@ -137,7 +137,7 @@ export async function RecordHistory({
 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="p-3 text-center">
+    <Card padding="sm" className="text-center">
       <p className="text-lg font-semibold text-gray-900 tabular-nums">{value}</p>
       <p className="text-xs text-gray-500">{label}</p>
     </Card>

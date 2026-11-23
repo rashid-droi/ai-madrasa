@@ -52,7 +52,7 @@ export async function saveTasks(input: unknown): Promise<SaveTasksResult> {
     update: { teacherId: teacher.id, ...data },
   });
 
-  revalidatePath("/teacher");
+  revalidatePath("/teacher", "layout");
   revalidatePath("/student", "layout");
   revalidatePath("/admin", "layout");
   return { ok: true };

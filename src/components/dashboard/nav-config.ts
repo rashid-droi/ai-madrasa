@@ -10,9 +10,13 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/admin/students", label: "Students", icon: "students" },
     { href: "/admin/records", label: "Records", icon: "calendar" },
   ],
-  TEACHER: [{ href: "/teacher", label: "Daily Tasks", icon: "check" }],
+  TEACHER: [
+    { href: "/teacher", label: "Overview", icon: "home" },
+    { href: "/teacher/tasks", label: "Daily Tasks", icon: "check" },
+  ],
   STUDENT: [
-    { href: "/student", label: "Today", icon: "check" },
+    { href: "/student", label: "Overview", icon: "home" },
+    { href: "/student/today", label: "Today", icon: "check" },
     { href: "/student/history", label: "History", icon: "calendar" },
   ],
 };
