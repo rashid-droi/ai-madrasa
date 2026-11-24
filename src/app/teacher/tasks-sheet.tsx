@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, useTransition } from "react";
 import { MarksView, ProgressBar } from "@/components/progress";
+import { TickTime } from "@/components/tick-time";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { addDays, formatDate, localToday } from "@/lib/dates";
@@ -10,6 +11,7 @@ import {
   ACTIVITIES,
   ACTIVITY_KEYS,
   countDone,
+  PRAYERS,
   TOTAL_MARKS,
   type Marks,
   type Tasks,
@@ -167,15 +169,41 @@ export function TasksSheet({ date, students }: { date: string; students: Student
                   </div>
                   <p className="mt-1 text-xs text-gray-500">{s.className}</p>
                 </div>
+                <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg border border-gray-200 px-2.5 text-sm font-medium text-brand-700">
+                  {isOpen ? "Close" : "Set tasks"}
                 <svg
                   viewBox="0 0 20 20"
                   fill="currentColor"
                   aria-hidden
-                  className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
                 >
                   <path d="M5.2 7.2a.75.75 0 0 1 1.06 0L10 10.94l3.74-3.74a.75.75 0 1 1 1.06 1.06l-4.27 4.27a.75.75 0 0 1-1.06 0L5.2 8.26a.75.75 0 0 1 0-1.06Z" />
                 </svg>
+                </span>
               </button>
+
+              {/* Prayer tick times, always visible */}
+              <ul aria-label={`${s.name} prayer ticks`} className="grid grid-cols-5 gap-1.5 px-4 pb-3">
+                {PRAYERS.map((p) => {
+                  const on = s.marks[p.key];
+                  const at = s.times[p.key];
+                  return (
+                    <li
+                      key={p.key}
+                      className={`flex flex-col items-center rounded-lg px-1 py-1.5 text-center ${
+                        on ? "bg-brand-50 text-brand-700" : "bg-gray-50 text-gray-400"
+                      }`}
+                    >
+                      <span className="text-xs font-medium">
+                        <span aria-hidden>{on ? "✓ " : ""}</span>
+                        {p.label}
+                        <span className="sr-only">{on ? " ticked" : " not ticked"}</span>
+                      </span>
+                      {on && at ? <TickTime iso={at} recordDate={date} /> : <span className="text-xs">{on ? "no time" : "–"}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
 
               {isOpen && (
                 <div id={`student-${s.id}`} className="space-y-5 border-t border-gray-100 px-4 py-4">
@@ -189,7 +217,7 @@ export function TasksSheet({ date, students }: { date: string; students: Student
                     <h3 className="text-sm font-semibold text-gray-700">Tasks for this day</h3>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {ACTIVITIES.map((a) => (
-                        <Field key={a.key} label={a.label} htmlFor={`${s.id}-${a.key}`}>
+                        <Field key={a.key} label={a.taskLabel} htmlFor={`${s.id}-${a.key}`}>
                           <Input
                             id={`${s.id}-${a.key}`}
                             value={draft[a.key]}
@@ -222,9 +250,9 @@ export function TasksSheet({ date, students }: { date: string; students: Student
 
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-gray-700">
-                      Student&apos;s ticks <span className="font-normal text-gray-400">with the time they ticked</span>
+                      Activities ticked <span className="font-normal text-gray-400">with the time they ticked</span>
                     </h3>
-                    <MarksView date={date} marks={s.marks} times={s.times} tasks={s.tasks} />
+                    <MarksView date={date} marks={s.marks} times={s.times} tasks={s.tasks} showPrayers={false} />
                   </div>
                 </div>
               )}

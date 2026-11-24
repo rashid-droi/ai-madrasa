@@ -26,38 +26,42 @@ export function MarksView({
   marks,
   times,
   tasks,
+  showPrayers = true,
 }: {
   date: string;
   marks: Marks;
   times: TickTimes;
   tasks: Tasks;
+  showPrayers?: boolean;
 }) {
   return (
     <div className="space-y-3">
-      <div>
-        <p className="mb-1.5 text-xs font-medium text-gray-500">Prayers</p>
-        <ul className="grid grid-cols-5 gap-1.5">
-          {PRAYERS.map((p) => (
-            <li
-              key={p.key}
-              className={`flex flex-col items-center rounded-lg px-1 py-1.5 text-center ${
-                marks[p.key] ? "bg-brand-50 text-brand-700" : "bg-gray-50 text-gray-400"
-              }`}
-            >
-              <span className="text-xs font-medium">
-                <span aria-hidden>{marks[p.key] ? "✓ " : ""}</span>
-                {p.label}
-                <span className="sr-only">{marks[p.key] ? " done" : " not done"}</span>
-              </span>
-              {marks[p.key] && times[p.key] ? (
-                <TickTime iso={times[p.key]!} recordDate={date} />
-              ) : (
-                <span className="text-xs">–</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {showPrayers && (
+        <div>
+          <p className="mb-1.5 text-xs font-medium text-gray-500">Prayers</p>
+          <ul className="grid grid-cols-5 gap-1.5">
+            {PRAYERS.map((p) => (
+              <li
+                key={p.key}
+                className={`flex flex-col items-center rounded-lg px-1 py-1.5 text-center ${
+                  marks[p.key] ? "bg-brand-50 text-brand-700" : "bg-gray-50 text-gray-400"
+                }`}
+              >
+                <span className="text-xs font-medium">
+                  <span aria-hidden>{marks[p.key] ? "✓ " : ""}</span>
+                  {p.label}
+                  <span className="sr-only">{marks[p.key] ? " done" : " not done"}</span>
+                </span>
+                {marks[p.key] && times[p.key] ? (
+                  <TickTime iso={times[p.key]!} recordDate={date} />
+                ) : (
+                  <span className="text-xs">–</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div>
         <p className="mb-1.5 text-xs font-medium text-gray-500">Activities</p>

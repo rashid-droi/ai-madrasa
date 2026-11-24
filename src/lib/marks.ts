@@ -10,12 +10,12 @@ export const PRAYERS = [
 ] as const;
 
 export const ACTIVITIES = [
-  { key: "homework", label: "Homework", placeholder: "e.g. Finish exercise 3" },
-  { key: "unitReading", label: "Unit Reading", placeholder: "e.g. Unit 4, page 12" },
-  { key: "quranReading", label: "Quran Reading", placeholder: "e.g. Juz 2, pages 22–23" },
-  { key: "writing", label: "Writing", placeholder: "e.g. Write Surah Al-Ikhlas" },
-  { key: "dikrByheart", label: "Dikr Byheart", placeholder: "e.g. Morning adhkar" },
-  { key: "quranHifz", label: "Quran Hifz", placeholder: "e.g. Surah Al-Mulk 1–10" },
+  { key: "homework", label: "Homework", taskLabel: "Homework", placeholder: "e.g. Finish exercise 3" },
+  { key: "unitReading", label: "Unit Reading", taskLabel: "Unit Reading portion", placeholder: "e.g. Unit 4, page 12" },
+  { key: "quranReading", label: "Quran Reading", taskLabel: "Quran Reading portion", placeholder: "e.g. Juz 2, pages 22–23" },
+  { key: "writing", label: "Writing", taskLabel: "Writing portion", placeholder: "e.g. Write Surah Al-Ikhlas" },
+  { key: "dikrByheart", label: "Dikr Byheart", taskLabel: "Dikr to learn by heart", placeholder: "e.g. Morning adhkar" },
+  { key: "quranHifz", label: "Quran Hifz", taskLabel: "Hifz portion", placeholder: "e.g. Surah Al-Mulk 1–10" },
 ] as const;
 
 export type PrayerKey = (typeof PRAYERS)[number]["key"];
